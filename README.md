@@ -17,11 +17,11 @@ of number of requests per hour, navigate to `docker-compose.yml` and look for `M
 Run `npm test` from main directory and it will run all jest tests
 
 ## Tech Stack
-Typescript
-Docker
-Redis
-Express
-Jest
+* Typescript
+* Docker
+* Redis
+* Express
+* Jest
 
 ## Middleware
 The middleware is located at https://github.com/brvenkat/rate-limiter/blob/master/src/middlewares/rateLimiter.ts
