@@ -32,6 +32,7 @@ export const rateLimiter = async (req: Request, res: Response, next: () => void)
   } catch(e) {
     if (e instanceof RateLimiterError) {
       res.status(429).send(e.message)
+      return;
     }
     throw e;
   }

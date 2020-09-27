@@ -19,6 +19,15 @@ jest.mock('redis', () => ({
   }))
 }))
 
+jest.mock('../../src/config', () => ({
+  config: {
+    redis: {
+      host: 'some-host',
+      port: '1234'
+    }
+  }
+}))
+
 describe('RedisClient', () => {
   const OLD_ENV = process.env;
 
@@ -32,32 +41,24 @@ describe('RedisClient', () => {
   });
 
   it('Should create a redis client with no errors', async () => {
-    process.env.REDIS_PORT = '1234'
-    process.env.REDIS_HOST = 'some-host'
     await connect()
     expect(getClient()).not.toBeNull()
     close()
   })
 
   it('Should call get with correct parameters', async () => {
-    process.env.REDIS_PORT = '1234'
-    process.env.REDIS_HOST = 'some-host'
     await get('some-value')
     expect(mockGet).toHaveBeenCalledWith('some-value')
     close()
   })
 
   it('Should call set with correct parameters', async () => {
-    process.env.REDIS_PORT = '1234'
-    process.env.REDIS_HOST = 'some-host'
     await set('some-key', 'some-value')
     expect(mockSet).toHaveBeenCalledWith('some-key', 'some-value')
     close()
   })
 
   it('Should not create client when error thrown', async () => {
-    process.env.REDIS_PORT = '1234'
-    process.env.REDIS_HOST = 'some-host'
     jest.spyOn(redis, 'createClient').mockImplementation(() => { throw new Error('some-error')})
     try {
       await connect()

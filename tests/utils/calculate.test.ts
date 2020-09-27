@@ -1,6 +1,16 @@
 import { calculateUpdatedEntries } from '../../src/utils/calculate'
 import { RateLimiterError } from '../../src/error/error'
 
+jest.mock('../../src/config', () => ({
+  config: {
+    rl: {
+      timeLimit: 1,
+      maxCount: 3,
+      timeSlotSize: 5
+    }
+  }
+}))
+
 describe('calculate.ts', () => {
   const OLD_ENV = process.env;
 
@@ -15,9 +25,6 @@ describe('calculate.ts', () => {
 
   it('Should return new entries when user has not hit limit', () => {
     jest.spyOn(Date, 'now').mockReturnValue(new Date('2019/11/24').getTime());
-    process.env.MAX_REQUESTS = '3'
-    process.env.TIME_INTERVAL = '1'
-    process.env.INDIVIDUAL_TIME_SLOT = '5'
     const requestInfo=[
       {
           timestamp: 1574510399,
@@ -30,9 +37,6 @@ describe('calculate.ts', () => {
 
   it('Should append to existing entry when user has not hit limit', () => {
     jest.spyOn(Date, 'now').mockReturnValue(new Date('2019/11/24').getTime());
-    process.env.MAX_REQUESTS = '3'
-    process.env.TIME_INTERVAL = '1'
-    process.env.INDIVIDUAL_TIME_SLOT = '5'
     const requestInfo=[
       {
           timestamp: 1574514001,
@@ -45,9 +49,6 @@ describe('calculate.ts', () => {
   
   it('Should throw error when limit is exceeded', () => {
     jest.spyOn(Date, 'now').mockReturnValue(new Date('2019/11/24').getTime());
-    process.env.MAX_REQUESTS = '3'
-    process.env.TIME_INTERVAL = '1'
-    process.env.INDIVIDUAL_TIME_SLOT = '5'
     const requestInfo=[
       {
           timestamp: 1574514001,

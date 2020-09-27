@@ -14,12 +14,12 @@ describe('rateLimter', () => {
       ip: '12345'
     })
     res = partialOf<Response>({})
+    jest.spyOn(Date, 'now').mockReturnValue(new Date('2019/11/24').getTime());
   })
 
   afterEach(() => jest.resetAllMocks())
 
   it('Should add an entry if ip does not exist', async () => {
-    jest.spyOn(Date, 'now').mockReturnValue(new Date('2019/11/24').getTime());
     const getSpy = jest.spyOn(redisClient, 'get').mockResolvedValue(null)
     const setSpy = jest.spyOn(redisClient, 'set').mockResolvedValue(true)
     await rateLimiter(req, res, () => null)
@@ -31,7 +31,6 @@ describe('rateLimter', () => {
   })
 
   it('Should update existing entry if one exists', async () => {
-    jest.spyOn(Date, 'now').mockReturnValue(new Date('2019/11/24').getTime());
     const getSpy = jest.spyOn(redisClient, 'get').mockResolvedValue(JSON.stringify([{
       timestamp: 1574514000,
       count: 2
@@ -54,7 +53,6 @@ describe('rateLimter', () => {
   })
   
   it('Should throw error when rate limiter errors', async () => {
-    jest.spyOn(Date, 'now').mockReturnValue(new Date('2019/11/24').getTime());
     const getSpy = jest.spyOn(redisClient, 'get').mockResolvedValue(JSON.stringify([{
       timestamp: 1574514000,
       count: 2

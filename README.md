@@ -23,13 +23,19 @@ Redis
 Express
 Jest
 
+## Middleware
+The middleware is located at https://github.com/brvenkat/rate-limiter/blob/master/src/middlewares/rateLimiter.ts
+
 ## Core Logic of RateLimiter
 The number of requests are maintained in Redis cache based on request IP address and timestamp
 The rate limiter middleware uses the concept of sliding one hour windows instead of a fixed one to throttle requests. The issue with fixed one hour window is irregular hits to the server.
 Consider the scenario of 100 requests limit from time 0 to time 60.The server could be hit with requests from 55th to 60th minute and then again from 61st to 66th minute with 100 requests and server could be overloaded in these 10 minutes. This can impact server performance in that time.The sliding window takes the current request time and looks for number of requests in the last one hour and throttles requests based on count in that one hour. It does so by dividing the 60 minutes into time slots of x minutes each (variable `INDIVIDUAL_TIME_SLOT` in docker-compose). The reason for dividing into time slots is because we do not want to create new entry for every request into redis and affect memory usage. With this approach, once a request comes in we first check if an entry exists in cache for that IP, if not, entry is added to cache for that IP and request proceeds. If entry exists for that IP, we check the request timestamp and grab the latest timeslot in cache. If the request timestamp falls in the latest time slot, the count of latest timestamp is incremented else a new entry is created for that timestamp with count set to 1. If the number of requests in the past 1 hour exceeds maximum allowed, the rate limiter sends back status of 429 with custom text message.
 
+## Assumption
+Assumed that time limit set in config is in hours and the individual time slots is in minutes. It is easy to fix this by adding another
+config to specify the time units.
+
 ## Limitations
 There are couple of things that can be optimized
-1. Add environment variables into AWS/Cloud and read the values from AWS 
-2. The timeslots are not contiguouos at the moment. I.e 60 minutes is divided into 12, 5 minute slots. But the timeslots are not contiguouos and the next slot begins once the first request in that particular slot arrives. Left it as is for now. 
-3. Data can be added into cache in a sorted way and we need not sort it everytime.
+1. Add environment variables into AWS/Cloud and read the values from AWS. 
+2. Data can be added into cache in a sorted way and we need not sort it everytime.

@@ -1,6 +1,7 @@
 import { RequestInfo } from '../middlewares/rateLimiter'
 import moment from 'moment'
 import { RateLimiterError } from '../error/error'
+import { config } from '../config'
 
 const customSorter = (first: RequestInfo, second:RequestInfo) => second.timestamp - first.timestamp;
 
@@ -12,20 +13,20 @@ const customSorter = (first: RequestInfo, second:RequestInfo) => second.timestam
  */
 export const calculateUpdatedEntries = (entries: RequestInfo[]) => {
   let newEntries = entries;
-  const timeChunks = parseInt(process.env.INDIVIDUAL_TIME_SLOT, 10);
+  const { timeLimit, maxCount, timeSlotSize } = config.rl
   const currentTime = moment().unix()
-  const lastOneHour = moment().subtract(parseInt(process.env.TIME_INTERVAL, 10), 'hour').unix();
+  const lastOneHour = moment().subtract(timeLimit, 'hour').unix();
   const requestsInOneHour = entries.filter((entry: RequestInfo) => entry.timestamp > lastOneHour);
   const totalRequests = 1 + requestsInOneHour.reduce((sum: number, value: RequestInfo) => sum + value.count, 0)
   const sortedCacheData = entries.sort(customSorter)
   const latestTimeStamp = Array.isArray(sortedCacheData) && sortedCacheData.length > 0 && sortedCacheData[0].timestamp;
 
-  if (totalRequests > parseInt(process.env.MAX_REQUESTS, 10)) {
-    const newIntervalTime = (moment.unix(latestTimeStamp).add(timeChunks, 'minutes')).unix()
+  if (totalRequests > maxCount) {
+    const newIntervalTime = (moment.unix(latestTimeStamp).add(timeSlotSize, 'minutes')).unix()
     throw new RateLimiterError(`Rate limit exceeded. Try again in ${(newIntervalTime - currentTime)} seconds.`)
   }
 
-  if (currentTime > moment.unix(latestTimeStamp).add(timeChunks, 'minutes').unix()) {
+  if (currentTime > moment.unix(latestTimeStamp).add(timeSlotSize, 'minutes').unix()) {
     newEntries = newEntries.concat({
       timestamp: currentTime,
       count: 1
