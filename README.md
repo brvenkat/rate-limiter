@@ -39,3 +39,10 @@ config to specify the time units.
 There are couple of things that can be optimized
 1. Add environment variables into AWS/Cloud and read the values from AWS. 
 2. Data can be added into cache in a sorted way and we need not sort it everytime.
+
+## Screenshots
+Rate limit exceeded
+<img width="1663" alt="Screen Shot 2020-09-26 at 9 01 47 pm" src="https://user-images.githubusercontent.com/11412050/94353641-ba06fc80-00b6-11eb-88e6-060ed2ed195a.png">
+
+Request Allowed
+<img width="1672" alt="Screen Shot 2020-09-26 at 9 01 38 pm" src="https://user-images.githubusercontent.com/11412050/94353642-c0957400-00b6-11eb-8e1f-e0f0f6f526b7.png">
